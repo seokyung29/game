@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>다음 생애 환생 시뮬레이터 (Reincarnation Simulator)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;800;900&family=Jua&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Canvas Confetti CDN for fun celebration effects -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <div class="stars-bg"></div>
+  <div class="main-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="badge">🎲 인생 2회차 가챠</div>
+      <h1 class="title">다음 생애 환생 시뮬레이터</h1>
+      <p class="subtitle">"이번 생은 글렀고(?) 다음 생엔 과연 어디서 태어날까?"</p>
+    </header>
+
+    <!-- Step 1: Mode Selection & Input -->
+    <div id="setup-card" class="glass-card">
+      <div class="mode-toggle">
+        <button id="mode-stat-btn" class="toggle-btn active" onclick="setMode('stat')">
+          🌍 현실 고증 모드 <span class="badge-sm">인구비율 100%</span>
+        </button>
+        <button id="mode-random-btn" class="toggle-btn" onclick="setMode('random')">
+          🎰 완전 운빨 모드 <span class="badge-sm">동일 확률</span>
+        </button>
+      </div>
+
+      <div class="mode-description" id="mode-desc">
+        현재 지구상에 태어나는 신생아 비율을 기반으로 작동합니다.<br>
+        <strong>(주의: 인도 & 중국 확률이 합쳐서 약 35%에 육박함!)</strong>
+      </div>
+
+      <!-- Quick Fun Karma Survey (Optional bonus flair) -->
+      <div class="karma-section">
+        <label class="karma-label">✨ 현생 업보(카르마) 한 줄 체크</label>
+        <select id="karma-select" class="custom-select">
+          <option value="normal">평범하게 출퇴근/등하교하며 살았음 (무난한 영혼)</option>
+          <option value="good">길고양이 밥 챙겨주고 분리수거 칼같이 함 (+행운 소폭)</option>
+          <option value="bad">월요일 아침마다 세상에 투정을 부림 (업보 스택 +1)</option>
+          <option value="wealth">로또 1등 기원 촛불 100일 켜봄 (자본주의 갈망)</option>
+        </select>
+      </div>
+
+      <button id="start-btn" class="glow-button" onclick="startReincarnation()">
+        ⚡ 환생의 문으로 입장하기 ⚡
+      </button>
+
+      <div class="fact-box">
+        💡 <strong>알고 계셨나요?</strong> 지금 이 순간에도 매초 약 4.3명의 아기가 지구상에 태어납니다.
+      </div>
+    </div>
+
+    <!-- Step 2: Slot Animation / Drum Roll screen -->
+    <div id="roulette-card" class="glass-card hidden">
+      <div class="portal-effect">
+        <div class="portal-ring"></div>
+        <div class="soul-icon">👻</div>
+      </div>
+      <h2 class="status-text" id="status-text">차원의 틈을 건너는 중...</h2>
+      
+      <!-- Slot Drum Roll Box -->
+      <div class="slot-machine">
+        <div class="slot-flag" id="slot-flag">🌍</div>
+        <div class="slot-country" id="slot-country">목적지 탐색 중...</div>
+      </div>
+      
+      <p class="slot-hint">신의 주사위가 굴러가고 있습니다!</p>
+    </div>
+
+    <!-- Step 3: Result Card -->
+    <div id="result-card" class="glass-card hidden">
+      <div class="result-badge" id="result-rarity">등급 계산중</div>
+      
+      <div class="result-flag-box">
+        <span id="result-flag" class="result-flag">🇮🇳</span>
+      </div>
+
+      <div class="result-country-title">
+        <span class="prefix">당신은 다음 생에</span>
+        <h2 id="result-country-name">인도</h2>
+        <span class="suffix">의 아기로 환생합니다! 🍼</span>
+      </div>
+
+      <!-- Result Quote / Humor -->
+      <div class="quote-box" id="result-quote">
+        "나마스테! 카레와 IT 코딩, 발리우드 댄스가 당신을 부릅니다!"
+      </div>
+
+      <!-- Detailed Spec Card -->
+      <div class="details-grid">
+        <div class="detail-item">
+          <span class="item-label">📊 당첨 확률</span>
+          <span class="item-value" id="detail-prob">17.8%</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">👶 추천 초기 직업</span>
+          <span class="item-value" id="detail-job">IT 천재 개발자</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">🎒 기본 장착 스킬</span>
+          <span class="item-value" id="detail-skill">무한 긍정과 흥</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">☀️ 기후 환경</span>
+          <span class="item-value" id="detail-climate">뜨거운 태양과 몬순</span>
+        </div>
+      </div>
+
+      <!-- Fun Commentary -->
+      <div class="fun-commentary" id="result-commentary">
+        전 세계 인구 1위 대국! 어딜 가나 사람이 넘쳐나 심심할 틈이 없습니다.
+      </div>
+
+      <!-- Share & Retry Buttons -->
+      <div class="action-buttons">
+        <button class="secondary-btn" onclick="retry()">
+          🔄 한 번 더 환생해보기 (마음에 안 듦)
+        </button>
+        <button class="share-btn" onclick="copyResult()">
+          📋 결과 텍스트 복사하기
+        </button>
+      </div>
+
+      <!-- Recent Reincarnation History / Log -->
+      <div class="history-container">
+        <h4>📜 나의 전생 / 환생 누적 기록</h4>
+        <ul id="history-list" class="history-list">
+          <!-- Filled by JS -->
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">결과가 클립보드에 복사되었습니다! 🎉</div>
+
+  <script src="countries.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
